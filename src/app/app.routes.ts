@@ -7,10 +7,16 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/login/login').then((m) => m.Login),
   },
   {
-    path: 'users',
+    path: '',
     canActivate: [authGuard],
-    loadComponent: () => import('./features/users/user-list/user-list').then((m) => m.UserList),
+    loadComponent: () => import('./core/layout/main-layout').then((m) => m.MainLayout),
+    children: [
+      {
+        path: 'users',
+        loadComponent: () => import('./features/users/user-list/user-list').then((m) => m.UserList),
+      },
+      { path: '', pathMatch: 'full', redirectTo: 'users' },
+    ],
   },
-  { path: '', pathMatch: 'full', redirectTo: 'users' },
-  { path: '**', redirectTo: 'users' },
+  { path: '**', redirectTo: '' },
 ];

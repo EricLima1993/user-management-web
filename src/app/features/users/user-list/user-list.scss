@@ -1,0 +1,45 @@
+.users {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-top: 16px;
+  }
+
+  &__search {
+    flex: 1 1 280px;
+  }
+
+  &__error {
+    color: var(--mat-sys-error);
+  }
+
+  &__table {
+    overflow-x: auto;
+
+    table {
+      width: 100%;
+    }
+  }
+
+  &__actions {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  &__empty {
+    padding: 24px;
+    text-align: center;
+  }
+}
