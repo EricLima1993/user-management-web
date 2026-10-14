@@ -1,0 +1,116 @@
+<h2>Novo usuário</h2>
+
+<form [formGroup]="form" (ngSubmit)="save()">
+    <mat-form-field appearance="outline">
+        <mat-label>Nome</mat-label>
+        <input matInput formControlName="name" />
+        @if (form.controls.name.hasError('required')) {
+        <mat-error>Informe o nome.</mat-error>
+        }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>E-mail</mat-label>
+        <input matInput type="email" formControlName="email" />
+        @if (form.controls.email.hasError('required')) {
+        <mat-error>Informe o e-mail.</mat-error>
+        } @else if (form.controls.email.hasError('email')) {
+        <mat-error>E-mail inválido.</mat-error>
+        }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Telefone</mat-label>
+        <input matInput formControlName="phone" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Senha</mat-label>
+        <input matInput type="password" formControlName="password" />
+        @if (form.controls.password.hasError('required')) {
+        <mat-error>Informe a senha.</mat-error>
+        } @else if (form.controls.password.hasError('minlength')) {
+        <mat-error>Mínimo de 8 caracteres.</mat-error>
+        }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Perfil</mat-label>
+        <mat-select formControlName="role">
+            <mat-option value="USER">Usuário</mat-option>
+            <mat-option value="ADMIN">Administrador</mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <h3>Endereços</h3>
+
+    <div formArrayName="addresses">
+        @for (address of addresses.controls; track address; let i = $index) {
+        <div class="address" [formGroupName]="i">
+            <mat-form-field appearance="outline">
+                <mat-label>CEP (só números)</mat-label>
+                <input matInput formControlName="cep" maxlength="8" (blur)="lookupCep(i)" />
+                @if (address.controls.cep.hasError('notFound')) {
+                <mat-error>CEP não encontrado.</mat-error>
+                } @else if (address.controls.cep.invalid) {
+                <mat-error>Informe 8 dígitos.</mat-error>
+                }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Rua</mat-label>
+                <input matInput formControlName="street" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Número</mat-label>
+                <input matInput formControlName="number" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Complemento</mat-label>
+                <input matInput formControlName="complement" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Bairro</mat-label>
+                <input matInput formControlName="district" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Cidade</mat-label>
+                <input matInput formControlName="city" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>UF</mat-label>
+                <input matInput formControlName="state" maxlength="2" />
+                @if (address.controls.state.invalid) {
+                <mat-error>Use 2 letras maiúsculas.</mat-error>
+                }
+            </mat-form-field>
+
+            <div class="address-actions">
+                <mat-radio-button [checked]="address.controls.mainAddress.value" (change)="setMain(i)">
+                    Endereço principal
+                </mat-radio-button>
+
+                <button mat-button type="button" (click)="removeAddress(i)" [disabled]="addresses.length === 1">
+                    Remover
+                </button>
+            </div>
+        </div>
+        }
+    </div>
+
+    <button mat-stroked-button type="button" (click)="addAddress()">
+        Adicionar endereço
+    </button>
+
+    <div class="actions">
+        <a mat-button routerLink="/users">Cancelar</a>
+        <button mat-flat-button type="submit" [disabled]="saving()">
+            {{ saving() ? 'Salvando...' : 'Salvar' }}
+        </button>
+    </div>
+</form>

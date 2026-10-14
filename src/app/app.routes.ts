@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
+import { UserForm } from './features/users/user-form/user-form';
 
 export const routes: Routes = [
   {
@@ -16,6 +17,7 @@ export const routes: Routes = [
         loadComponent: () => import('./features/users/user-list/user-list').then((m) => m.UserList),
       },
       { path: '', pathMatch: 'full', redirectTo: 'users' },
+      { path: 'users/new', component: UserForm },
     ],
   },
   { path: '**', redirectTo: '' },
