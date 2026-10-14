@@ -1,4 +1,4 @@
-<h2>Novo usuário</h2>
+<h2>{{ isEdit ? 'Editar usuário' : 'Novo usuário' }}</h2>
 
 <form [formGroup]="form" (ngSubmit)="save()">
     <mat-form-field appearance="outline">
@@ -27,6 +27,9 @@
     <mat-form-field appearance="outline">
         <mat-label>Senha</mat-label>
         <input matInput type="password" formControlName="password" />
+        @if (isEdit) {
+        <mat-hint>Deixe em branco para manter a senha atual.</mat-hint>
+        }
         @if (form.controls.password.hasError('required')) {
         <mat-error>Informe a senha.</mat-error>
         } @else if (form.controls.password.hasError('minlength')) {
@@ -34,6 +37,7 @@
         }
     </mat-form-field>
 
+    @if (isAdmin()) {
     <mat-form-field appearance="outline">
         <mat-label>Perfil</mat-label>
         <mat-select formControlName="role">
@@ -41,6 +45,17 @@
             <mat-option value="ADMIN">Administrador</mat-option>
         </mat-select>
     </mat-form-field>
+
+    @if (isEdit) {
+    <mat-form-field appearance="outline">
+        <mat-label>Situação</mat-label>
+        <mat-select formControlName="status">
+            <mat-option value="ACTIVE">Ativo</mat-option>
+            <mat-option value="INACTIVE">Inativo</mat-option>
+        </mat-select>
+    </mat-form-field>
+    }
+    }
 
     <h3>Endereços</h3>
 
