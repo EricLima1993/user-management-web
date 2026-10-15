@@ -14,7 +14,8 @@ A aplicação permite entrar com e-mail e senha, listar usuários com paginaçã
 - [x] Cadastro e edição de usuários, com múltiplos endereços e consulta de CEP
 - [x] Perfil do usuário comum (edição apenas dos próprios dados)
 - [x] Notificações de sucesso e erro (snackbar)
-- [ ] Spinner de carregamento e layout responsivo
+- [x] Indicador de carregamento na listagem e no formulário
+- [x] Layout responsivo (barra superior, listagem e formulário em telas pequenas)
 - [ ] Testes automatizados
 - [ ] Docker e Docker Compose
 
@@ -123,6 +124,14 @@ Uma única tela atende o cadastro e a edição:
 - **CEP:** ao sair do campo, o ViaCEP preenche rua, bairro, cidade e UF. CEP inexistente bloqueia o envio. Se o ViaCEP estiver fora do ar, os campos podem ser preenchidos à mão. O backend continua sendo a fonte da verdade e revalida o CEP.
 - **Erros da API:** a mensagem do Problem Details (`detail`) é exibida ao usuário, por exemplo e-mail já cadastrado.
 
+## Feedback visual e responsividade
+
+- **Carregamento:** a listagem mostra uma barra de progresso enquanto busca os dados, e a tabela exibe "Carregando..." quando está vazia. O formulário de edição mostra a mesma barra enquanto carrega o usuário e mantém o botão Salvar desabilitado, também durante o envio, para evitar cliques repetidos.
+- **Mensagens:** sucesso e erro aparecem em uma notificação (snackbar). Nos erros da API, a mensagem do Problem Details (`detail`) é exibida.
+- **Barra superior:** em telas largas fica em uma linha. Em telas pequenas (até 600 px), o título "Gestão de usuários" ocupa uma linha própria, como cabeçalho, e o e-mail, o perfil e o botão Sair ficam logo abaixo.
+- **Listagem:** em telas pequenas a tabela rola na horizontal, com os botões Editar e Excluir na última coluna, e o paginador permanece visível.
+- **Formulário:** fica centralizado, com largura máxima de 480 px.
+
 ## Decisões técnicas
 
 | Tema                        | Decisão                                                                  | Motivo                                                                            |
@@ -137,6 +146,9 @@ Uma única tela atende o cadastro e a edição:
 | Consulta de CEP             | O front consulta o ViaCEP direto, para dar resposta imediata             | Melhora a experiência; a API revalida o CEP e prevalece sobre o que o front enviou |
 | Bairro                      | Opcional no formulário                                                   | Segue o contrato da API, que aceita endereço sem bairro                           |
 | Atualização da tela         | `markForCheck` após respostas fora dos signals                           | O app é zoneless: o Angular só redesenha quando é avisado                         |
+| Estados de carregamento     | Signals `loading` e `saving` nos componentes                             | A tela reage sozinha, sem `markForCheck`, e o botão não é clicado duas vezes      |
+| Responsividade              | Regras de CSS por largura de tela, sem biblioteca extra                  | Atende ao celular com pouco código; a tabela rola em vez de quebrar o layout      |
+| Organização dos componentes | `.ts`, `.html` e `.scss` separados em todos os componentes               | Mesma convenção em todo o projeto, mais fácil de ler e de manter                  |
 | Controle de acesso          | Guards na tela e regra real na API                                       | Os guards melhoram a navegação; a segurança não depende do front                  |
 | Interface                   | Angular Material                                                         | Componentes prontos e acessíveis, com foco no que o teste pede                    |
 | Testes                      | Vitest                                                                   | Runner padrão do Angular atual, com API semelhante à do Jest                      |
