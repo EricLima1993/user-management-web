@@ -1,0 +1,35 @@
+.bar {
+  gap: 12px;
+}
+
+.bar__spacer {
+  flex: 1 1 auto;
+}
+
+.bar__user {
+  font-size: 0.875rem;
+}
+
+// Celular: o título vira um cabeçalho e o restante desce para a segunda linha
+@media (max-width: 600px) {
+  .bar {
+    height: auto; // a barra deixa de ter altura fixa
+    flex-wrap: wrap; // permite a segunda linha
+    padding-block: 8px;
+    gap: 4px 12px;
+  }
+
+  .bar__title {
+    flex: 1 0 100%; // o título ocupa a primeira linha inteira
+  }
+
+  .bar__spacer {
+    display: none; // sem o espaçador, o usuário preenche o espaço
+  }
+
+  .bar__user {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere; // e-mail longo quebra em vez de empurrar o Sair
+  }
+}

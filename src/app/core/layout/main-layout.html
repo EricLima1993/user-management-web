@@ -1,0 +1,7 @@
+<mat-toolbar class="bar">
+  <span class="bar__title">Gestão de usuários</span>
+  <span class="bar__spacer"></span>
+  <span class="bar__user">{{ auth.session()?.email }} ({{ auth.session()?.role }})</span>
+  <button mat-button (click)="auth.logout()">Sair</button>
+</mat-toolbar>
+<router-outlet />
