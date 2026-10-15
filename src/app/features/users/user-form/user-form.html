@@ -1,5 +1,9 @@
 <h2>{{ isEdit ? 'Editar usuário' : 'Novo usuário' }}</h2>
 
+@if (loading()) {
+<mat-progress-bar mode="indeterminate" />
+}
+
 <form [formGroup]="form" (ngSubmit)="save()">
     <mat-form-field appearance="outline">
         <mat-label>Nome</mat-label>
@@ -124,7 +128,7 @@
 
     <div class="actions">
         <a mat-button routerLink="/users">Cancelar</a>
-        <button mat-flat-button type="submit" [disabled]="saving()">
+        <button mat-flat-button type="submit" [disabled]="saving() || loading()">
             {{ saving() ? 'Salvando...' : 'Salvar' }}
         </button>
     </div>

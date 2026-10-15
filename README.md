@@ -56,7 +56,9 @@ No perfil `dev`, a API cria um administrador inicial:
 | ----------------- | ----------- | ------ |
 | `admin@local.dev` | `Admin@123` | ADMIN  |
 
-O banco do perfil `dev` é H2 em memória e é recriado a cada execução da API, então os usuários cadastrados somem ao reiniciá-la.
+Além do administrador, a API do perfil `dev` cadastra 12 usuários de exemplo, todos com a senha `Senha@123` (por exemplo, `ana.souza@teste.com` é ADMIN e `bruno.lima@teste.com` é USER). A lista completa está no README da API.
+
+O banco do perfil `dev` é H2 em memória e é recriado a cada execução da API, então os usuários cadastrados por você somem ao reiniciá-la. **Depois de reiniciar a API, saia e entre de novo no frontend**, porque a sessão aberta antes aponta para ids que já não existem.
 
 ### Endereço da API
 

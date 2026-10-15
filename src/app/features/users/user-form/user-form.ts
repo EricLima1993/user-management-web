@@ -12,12 +12,13 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { CepService } from '../../../core/cep/cep.service';
 import { UserService } from '../user.service';
 import { UserCreateRequest, UserUpdateRequest } from '../user.models';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
     selector: 'app-user-form',
     imports: [
         ReactiveFormsModule, RouterLink,
-        MatButtonModule, MatFormFieldModule, MatInputModule, MatRadioModule, MatSelectModule,
+        MatButtonModule, MatFormFieldModule, MatInputModule, MatProgressBarModule, MatRadioModule, MatSelectModule,
     ],
     templateUrl: './user-form.html',
     styleUrl: './user-form.scss',
@@ -36,6 +37,7 @@ export class UserForm {
     readonly isEdit = this.userId !== null;
     readonly isAdmin = this.auth.isAdmin;
     readonly saving = signal(false);
+    readonly loading = signal(false);
 
     readonly form = this.fb.group({
         name: ['', [Validators.required, Validators.maxLength(120)]],
@@ -75,6 +77,7 @@ export class UserForm {
     }
 
     private load(id: number) {
+        this.loading.set(true); // 1. liga ao começar
         this.userService.findById(id).subscribe({
             next: (user) => {
                 this.form.patchValue({
@@ -99,9 +102,11 @@ export class UserForm {
                     });
                     this.addresses.push(group);
                 });
+                this.loading.set(false); // 2. desliga quando os dados chegam
                 this.cdr.markForCheck();
             },
             error: (err: HttpErrorResponse) => {
+                this.loading.set(false); // 3. desliga também se der erro
                 this.snackBar.open(err.error?.detail ?? 'Não foi possível carregar o usuário.', 'OK', { duration: 6000 });
                 if (this.isAdmin()) this.router.navigate(['/users']); // USER fica na tela, sem ciclo
             },
