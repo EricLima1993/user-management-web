@@ -16,7 +16,7 @@ A aplicação permite entrar com e-mail e senha, listar usuários com paginaçã
 - [x] Notificações de sucesso e erro (snackbar)
 - [x] Indicador de carregamento na listagem e no formulário
 - [x] Layout responsivo (barra superior, listagem e formulário em telas pequenas)
-- [x] Testes automatizados (67 testes com Vitest)
+- [x] Testes automatizados (86 testes com Vitest, cerca de 87% de cobertura de linhas)
 - [ ] Docker e Docker Compose
 
 > Este README é atualizado conforme o desenvolvimento avança.
@@ -71,7 +71,7 @@ A URL base da API fica em `src/app/core/config/api.config.ts` (padrão `http://l
 ng test
 ```
 
-Os testes rodam com Vitest e usam um servidor HTTP de mentira (`HttpTestingController`), então não precisam do backend nem do ViaCEP no ar. Neste momento são 67 testes em 8 arquivos.
+Os testes rodam com Vitest e usam um servidor HTTP de mentira (`HttpTestingController`), então não precisam do backend nem do ViaCEP no ar. Neste momento são 86 testes em 9 arquivos.
 
 | Arquivo | O que verifica |
 | --- | --- |
@@ -81,10 +81,26 @@ Os testes rodam com Vitest e usam um servidor HTTP de mentira (`HttpTestingContr
 | `user.service.spec.ts` | Chamadas de listagem (paginação, ordenação e filtros), busca, criação, atualização e exclusão |
 | `cep.service.spec.ts` | Tradução da resposta do ViaCEP, CEP inexistente e serviço fora do ar |
 | `user-form.spec.ts` | Validações, endereços (principal único, mínimo de um), consulta de CEP, cadastro e edição, regras de ADMIN e USER |
+| `user-list.spec.ts` | Listagem, filtros com espera de 300 ms, paginação, ordenação, erros de carregamento e exclusão (confirmação, cancelamento, recarga e volta de página) |
 | `login.spec.ts` | Validação, estado de carregamento e mensagens de erro (401, servidor indisponível e demais) |
 | `app.spec.ts` | A aplicação inicia |
 
 As dependências são trocadas por versões de mentira (`AuthService`, `UserService`, `CepService`, `MatSnackBar`), o que deixa cada teste focado em uma única responsabilidade. Os testes de tela interagem pelo HTML, como o usuário faria.
+
+#### Cobertura
+
+```
+npm i -D @vitest/coverage-v8
+ng test --no-watch --coverage --coverage-include="src/app/**/*.ts"
+```
+
+O parâmetro `--coverage-include` faz o relatório contar o projeto inteiro. Sem ele, só entram os arquivos que algum teste importa, o que infla o número.
+
+| Linhas | Statements | Branches | Funções |
+| --- | --- | --- | --- |
+| 87,15% | 84,26% | 90% | 86,41% |
+
+Serviços, guards, interceptor, login, formulário e listagem de usuários estão com 100% das linhas. Ficaram sem teste os arquivos de configuração (`app.config.ts`, `app.routes.ts`), o layout principal (`main-layout.ts`), o diálogo de confirmação e o paginador em português. Os arquivos de modelos só têm interfaces, que não geram código executável.
 
 ### Docker
 
