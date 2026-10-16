@@ -16,7 +16,7 @@ A aplicação permite entrar com e-mail e senha, listar usuários com paginaçã
 - [x] Notificações de sucesso e erro (snackbar)
 - [x] Indicador de carregamento na listagem e no formulário
 - [x] Layout responsivo (barra superior, listagem e formulário em telas pequenas)
-- [ ] Testes automatizados
+- [x] Testes automatizados (67 testes com Vitest)
 - [ ] Docker e Docker Compose
 
 > Este README é atualizado conforme o desenvolvimento avança.
@@ -71,7 +71,20 @@ A URL base da API fica em `src/app/core/config/api.config.ts` (padrão `http://l
 ng test
 ```
 
-*Os testes serão documentados quando forem escritos.*
+Os testes rodam com Vitest e usam um servidor HTTP de mentira (`HttpTestingController`), então não precisam do backend nem do ViaCEP no ar. Neste momento são 67 testes em 8 arquivos.
+
+| Arquivo | O que verifica |
+| --- | --- |
+| `auth.service.spec.ts` | Login, sessão guardada em `sessionStorage`, restauração, expiração do token, logout e perfil ADMIN |
+| `auth.interceptor.spec.ts` | Token só vai para a nossa API (nunca para o ViaCEP); 401 encerra a sessão, exceto no próprio login |
+| `auth.guard.spec.ts` | `authGuard`, `adminGuard` e `selfOrAdminGuard`: quem passa e para onde cada um é redirecionado |
+| `user.service.spec.ts` | Chamadas de listagem (paginação, ordenação e filtros), busca, criação, atualização e exclusão |
+| `cep.service.spec.ts` | Tradução da resposta do ViaCEP, CEP inexistente e serviço fora do ar |
+| `user-form.spec.ts` | Validações, endereços (principal único, mínimo de um), consulta de CEP, cadastro e edição, regras de ADMIN e USER |
+| `login.spec.ts` | Validação, estado de carregamento e mensagens de erro (401, servidor indisponível e demais) |
+| `app.spec.ts` | A aplicação inicia |
+
+As dependências são trocadas por versões de mentira (`AuthService`, `UserService`, `CepService`, `MatSnackBar`), o que deixa cada teste focado em uma única responsabilidade. Os testes de tela interagem pelo HTML, como o usuário faria.
 
 ### Docker
 
