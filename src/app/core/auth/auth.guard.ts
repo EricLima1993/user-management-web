@@ -13,9 +13,9 @@ export const adminGuard: CanActivateFn = () => {
 
   if (auth.isAdmin()) return true;
 
-  // USER não vê a listagem: vai para o próprio perfil
+  // USER não vê a listagem: vai para a própria página de detalhes
   const id = auth.session()?.userId;
-  return id ? router.createUrlTree(['/users', id]) : router.createUrlTree(['/login']);
+  return id ? router.createUrlTree(['/users', id, 'details']) : router.createUrlTree(['/login']);
 };
 
 export const selfOrAdminGuard: CanActivateFn = (route) => {
@@ -27,5 +27,5 @@ export const selfOrAdminGuard: CanActivateFn = (route) => {
   const ownId = auth.session()?.userId;
   if (ownId && String(ownId) === route.paramMap.get('id')) return true;
 
-  return ownId ? router.createUrlTree(['/users', ownId]) : router.createUrlTree(['/login']);
+  return ownId ? router.createUrlTree(['/users', ownId, 'details']) : router.createUrlTree(['/login']);
 };

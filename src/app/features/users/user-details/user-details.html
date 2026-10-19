@@ -1,0 +1,54 @@
+<h2>Detalhes do usuário</h2>
+
+@if (loading()) {
+<mat-progress-bar mode="indeterminate" />
+}
+
+@if (user(); as u) {
+<section class="card">
+    <dl>
+        <dt>Nome</dt>
+        <dd>{{ u.name }}</dd>
+
+        <dt>E-mail</dt>
+        <dd>{{ u.email }}</dd>
+
+        <dt>Telefone</dt>
+        <dd>{{ u.phone || '—' }}</dd>
+
+        <dt>Perfil</dt>
+        <dd>{{ u.role === 'ADMIN' ? 'Administrador' : 'Usuário' }}</dd>
+
+        <dt>Situação</dt>
+        <dd>{{ u.status === 'ACTIVE' ? 'Ativo' : 'Inativo' }}</dd>
+
+        <dt>Criado em</dt>
+        <dd>{{ u.createdAt | date: 'dd/MM/yyyy HH:mm' }}</dd>
+
+        <dt>Atualizado em</dt>
+        <dd>{{ u.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</dd>
+    </dl>
+</section>
+
+<h3>Endereços</h3>
+
+@for (a of u.addresses; track a.id) {
+<section class="card address" [class.address--main]="a.mainAddress">
+    @if (a.mainAddress) {
+    <span class="badge">Principal</span>
+    }
+    <div>{{ a.street }}, {{ a.number }}{{ a.complement ? ' - ' + a.complement : '' }}</div>
+    <div>{{ a.district ? a.district + ' · ' : '' }}{{ a.city }} - {{ a.state }}</div>
+    <div>CEP {{ a.cep }}</div>
+</section>
+} @empty {
+<p class="empty">Nenhum endereço cadastrado.</p>
+}
+}
+
+<div class="actions">
+    @if (isAdmin()) {
+    <a mat-button routerLink="/users">Voltar</a>
+    }
+    <a mat-flat-button [routerLink]="['/users', userId]">Editar</a>
+</div>

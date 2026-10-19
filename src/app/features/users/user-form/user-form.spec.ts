@@ -282,7 +282,7 @@ describe('UserForm', () => {
       expect(navigate).toHaveBeenCalledWith(['/users']);
     });
 
-    it('USER não envia perfil nem situação e continua na tela', () => {
+    it('USER não envia perfil nem situação e volta para a própria página de detalhes', () => {
       const { component, navigate } = setup({ id: '7', admin: false });
 
       component.save();
@@ -290,7 +290,7 @@ describe('UserForm', () => {
       const body = userService.update.mock.calls[0][1];
       expect('role' in body).toBe(false);
       expect('status' in body).toBe(false);
-      expect(navigate).not.toHaveBeenCalled();
+      expect(navigate).toHaveBeenCalledWith(['/users', '7', 'details']);
     });
 
     it('mostra o erro e volta à listagem quando o usuário não carrega (ADMIN)', () => {

@@ -175,7 +175,7 @@ export class UserForm {
             next: () => {
                 this.snackBar.open(this.isEdit ? 'Usuário atualizado.' : 'Usuário criado com sucesso.', 'OK', { duration: 3000 });
                 this.saving.set(false);
-                if (this.isAdmin()) this.router.navigate(['/users']);
+                this.router.navigate(this.isAdmin() ? ['/users'] : ['/users', this.userId, 'details']);
             },
             error: (err: HttpErrorResponse) => {
                 this.saving.set(false);

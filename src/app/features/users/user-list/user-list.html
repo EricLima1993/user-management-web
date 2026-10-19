@@ -82,6 +82,7 @@
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let user" class="users__actions">
+          <a mat-button [routerLink]="['/users', user.id, 'details']">Ver</a>
           <a mat-button [routerLink]="['/users', user.id]">Editar</a>
           <button mat-button type="button" [disabled]="user.id === currentUserId()" (click)="remove(user)">
             Excluir

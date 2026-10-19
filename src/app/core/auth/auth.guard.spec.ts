@@ -73,7 +73,7 @@ describe('guards de rota', () => {
     it('leva o USER para o próprio perfil', () => {
       loginAs('USER', 7);
 
-      expect(run(adminGuard)).toBe('/users/7');
+      expect(run(adminGuard)).toBe('/users/7/details');
     });
 
     it('manda para o login quando não há sessão', () => {
@@ -97,7 +97,7 @@ describe('guards de rota', () => {
     it('devolve o USER ao próprio perfil quando tenta abrir o de outra pessoa', () => {
       loginAs('USER', 7);
 
-      expect(run(selfOrAdminGuard, { id: '8' })).toBe('/users/7');
+      expect(run(selfOrAdminGuard, { id: '8' })).toBe('/users/7/details');
     });
 
     it('manda para o login quando não há sessão', () => {

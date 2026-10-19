@@ -23,6 +23,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/users/user-form/user-form').then((m) => m.UserForm),
       },
       {
+        path: 'users/:id/details',
+        canActivate: [selfOrAdminGuard],
+        loadComponent: () => import('./features/users/user-details/user-details').then((m) => m.UserDetails),
+      },
+      {
         path: 'users/:id',
         canActivate: [selfOrAdminGuard],
         loadComponent: () => import('./features/users/user-form/user-form').then((m) => m.UserForm),

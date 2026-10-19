@@ -13,10 +13,11 @@ A aplicação permite entrar com e-mail e senha, listar usuários com paginaçã
 - [x] Exclusão de usuário com confirmação
 - [x] Cadastro e edição de usuários, com múltiplos endereços e consulta de CEP
 - [x] Perfil do usuário comum (edição apenas dos próprios dados)
-- [x] Notificações de sucesso e erro (snackbar)
+- [x] Página de detalhes do usuário, com endereços e acesso à edição
+- [x] Notificações de sucesso e erro (snackbar), inclusive aviso de sessão expirada
 - [x] Indicador de carregamento na listagem e no formulário
 - [x] Layout responsivo (barra superior, listagem e formulário em telas pequenas)
-- [x] Testes automatizados (86 testes com Vitest, cerca de 87% de cobertura de linhas)
+- [x] Testes automatizados (97 testes com Vitest, cerca de 88% de cobertura de linhas)
 - [ ] Docker e Docker Compose
 
 > Este README é atualizado conforme o desenvolvimento avança.
@@ -71,17 +72,18 @@ A URL base da API fica em `src/app/core/config/api.config.ts` (padrão `http://l
 ng test
 ```
 
-Os testes rodam com Vitest e usam um servidor HTTP de mentira (`HttpTestingController`), então não precisam do backend nem do ViaCEP no ar. Neste momento são 86 testes em 9 arquivos.
+Os testes rodam com Vitest e usam um servidor HTTP de mentira (`HttpTestingController`), então não precisam do backend nem do ViaCEP no ar. Neste momento são 97 testes em 10 arquivos.
 
 | Arquivo | O que verifica |
 | --- | --- |
 | `auth.service.spec.ts` | Login, sessão guardada em `sessionStorage`, restauração, expiração do token, logout e perfil ADMIN |
-| `auth.interceptor.spec.ts` | Token só vai para a nossa API (nunca para o ViaCEP); 401 encerra a sessão, exceto no próprio login |
+| `auth.interceptor.spec.ts` | Token só vai para a nossa API (nunca para o ViaCEP); 401 encerra a sessão e avisa que ela expirou, exceto no próprio login |
 | `auth.guard.spec.ts` | `authGuard`, `adminGuard` e `selfOrAdminGuard`: quem passa e para onde cada um é redirecionado |
 | `user.service.spec.ts` | Chamadas de listagem (paginação, ordenação e filtros), busca, criação, atualização e exclusão |
 | `cep.service.spec.ts` | Tradução da resposta do ViaCEP, CEP inexistente e serviço fora do ar |
 | `user-form.spec.ts` | Validações, endereços (principal único, mínimo de um), consulta de CEP, cadastro e edição, regras de ADMIN e USER |
 | `user-list.spec.ts` | Listagem, filtros com espera de 300 ms, paginação, ordenação, erros de carregamento e exclusão (confirmação, cancelamento, recarga e volta de página) |
+| `user-details.spec.ts` | Dados e endereços na tela (principal em destaque), carregamento, erro da API e botões Editar e Voltar conforme o perfil |
 | `login.spec.ts` | Validação, estado de carregamento e mensagens de erro (401, servidor indisponível e demais) |
 | `app.spec.ts` | A aplicação inicia |
 
@@ -98,9 +100,9 @@ O parâmetro `--coverage-include` faz o relatório contar o projeto inteiro. Sem
 
 | Linhas | Statements | Branches | Funções |
 | --- | --- | --- | --- |
-| 87,15% | 84,26% | 90% | 86,41% |
+| 87,91% | 84,93% | 90,09% | 85,22% |
 
-Serviços, guards, interceptor, login, formulário e listagem de usuários estão com 100% das linhas. Ficaram sem teste os arquivos de configuração (`app.config.ts`, `app.routes.ts`), o layout principal (`main-layout.ts`), o diálogo de confirmação e o paginador em português. Os arquivos de modelos só têm interfaces, que não geram código executável.
+Serviços, guards, interceptor, login, formulário, listagem e detalhes de usuários estão com 100% das linhas. Ficaram sem teste os arquivos de configuração (`app.config.ts`, `app.routes.ts`), o layout principal (`main-layout.ts`), o diálogo de confirmação e o paginador em português. Os arquivos de modelos só têm interfaces, que não geram código executável.
 
 ### Docker
 
@@ -119,8 +121,9 @@ src/app/
 ├── features/
 │   ├── auth/login/  # Tela de login
 │   └── users/       # Serviço e tipos de usuário
-│       ├── user-list/   # Listagem com paginação, busca e filtros
-│       └── user-form/   # Formulário de cadastro e edição
+│       ├── user-list/    # Listagem com paginação, busca e filtros
+│       ├── user-details/ # Página de detalhes do usuário
+│       └── user-form/    # Formulário de cadastro e edição
 └── shared/          # Componentes reutilizáveis (diálogo de confirmação)
 ```
 
@@ -129,11 +132,11 @@ As telas são carregadas sob demanda (`loadComponent`) e não há módulos (`NgM
 ## Autenticação e autorização
 
 - **Login:** `POST /auth/login` devolve um JWT. O `AuthService` decodifica o token, guarda a sessão (e-mail, perfil, validade) em um **signal** e a persiste no `sessionStorage`, que se perde ao fechar a aba.
-- **Interceptor:** anexa `Authorization: Bearer <token>` apenas às chamadas para a nossa API (o token não é enviado ao ViaCEP). Se a API responder `401` (token ausente, inválido ou expirado), a sessão é encerrada e a pessoa volta ao login.
+- **Interceptor:** anexa `Authorization: Bearer <token>` apenas às chamadas para a nossa API (o token não é enviado ao ViaCEP). Se a API responder `401` (token ausente, inválido ou expirado), a sessão é encerrada, a pessoa vê o aviso "Sua sessão expirou. Entre novamente." e volta ao login.
 - **Guards:**
   - `authGuard` exige uma sessão válida.
-  - `adminGuard` protege a listagem e o cadastro. Quem não é ADMIN é levado ao próprio perfil.
-  - `selfOrAdminGuard` protege a edição: o ADMIN abre qualquer usuário e o USER abre apenas o próprio.
+  - `adminGuard` protege a listagem e o cadastro. Quem não é ADMIN é levado à própria página de detalhes.
+  - `selfOrAdminGuard` protege os detalhes e a edição: o ADMIN abre qualquer usuário e o USER abre apenas o próprio.
 - **Validade:** a tela usa o campo `exp` do próprio token para saber se a sessão ainda vale. O backend não emite refresh token, então, ao expirar, é preciso entrar de novo.
 
 Os guards existem para a experiência de uso. **A regra de acesso é aplicada pela API**, que responde `403` quando um USER tenta acessar dados de outra pessoa, mesmo que a tela seja contornada.
@@ -141,7 +144,13 @@ Os guards existem para a experiência de uso. **A regra de acesso é aplicada pe
 | Perfil | O que pode fazer                                                     |
 | ------ | -------------------------------------------------------------------- |
 | ADMIN  | Listar, criar, editar e excluir qualquer usuário                     |
-| USER   | Ver e editar apenas o próprio cadastro (sem alterar perfil e status) |
+| USER   | Ver os detalhes e editar apenas o próprio cadastro (sem alterar perfil e status) |
+
+## Página de detalhes
+
+Mostra os dados do usuário (nome, e-mail, telefone, perfil, situação e datas de criação e atualização) e a lista de endereços, com o principal em destaque. O botão **Editar** abre o formulário e o **Voltar**, exibido apenas ao ADMIN, retorna à listagem.
+
+Na listagem, o botão **Ver** abre os detalhes do usuário. O USER entra direto na própria página de detalhes depois do login e volta a ela depois de salvar a edição.
 
 ## Formulário de usuário
 
@@ -158,7 +167,7 @@ Uma única tela atende o cadastro e a edição:
 - **Carregamento:** a listagem mostra uma barra de progresso enquanto busca os dados, e a tabela exibe "Carregando..." quando está vazia. O formulário de edição mostra a mesma barra enquanto carrega o usuário e mantém o botão Salvar desabilitado, também durante o envio, para evitar cliques repetidos.
 - **Mensagens:** sucesso e erro aparecem em uma notificação (snackbar). Nos erros da API, a mensagem do Problem Details (`detail`) é exibida.
 - **Barra superior:** em telas largas fica em uma linha. Em telas pequenas (até 600 px), o título "Gestão de usuários" ocupa uma linha própria, como cabeçalho, e o e-mail, o perfil e o botão Sair ficam logo abaixo.
-- **Listagem:** em telas pequenas a tabela rola na horizontal, com os botões Editar e Excluir na última coluna, e o paginador permanece visível.
+- **Listagem:** em telas pequenas a tabela rola na horizontal, com os botões Ver, Editar e Excluir na última coluna, e o paginador permanece visível.
 - **Formulário:** fica centralizado, com largura máxima de 480 px.
 
 ## Decisões técnicas
@@ -178,6 +187,7 @@ Uma única tela atende o cadastro e a edição:
 | Estados de carregamento     | Signals `loading` e `saving` nos componentes                             | A tela reage sozinha, sem `markForCheck`, e o botão não é clicado duas vezes      |
 | Responsividade              | Regras de CSS por largura de tela, sem biblioteca extra                  | Atende ao celular com pouco código; a tabela rola em vez de quebrar o layout      |
 | Organização dos componentes | `.ts`, `.html` e `.scss` separados em todos os componentes               | Mesma convenção em todo o projeto, mais fácil de ler e de manter                  |
+| Página de detalhes          | Tela de leitura separada do formulário de edição                          | O USER vê seus dados antes de editar; o ADMIN consulta sem risco de alterar        |
 | Controle de acesso          | Guards na tela e regra real na API                                       | Os guards melhoram a navegação; a segurança não depende do front                  |
 | Interface                   | Angular Material                                                         | Componentes prontos e acessíveis, com foco no que o teste pede                    |
 | Testes                      | Vitest                                                                   | Runner padrão do Angular atual, com API semelhante à do Jest                      |
