@@ -1,6 +1,7 @@
 import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { API_URL } from '../config/api.config';
 import { authInterceptor } from './auth.interceptor';
 import { AuthService } from './auth.service';
@@ -10,15 +11,19 @@ describe('authInterceptor', () => {
   let controller: HttpTestingController;
   let currentToken: string | null;
   const logout = vi.fn();
+  const open = vi.fn();
 
   beforeEach(() => {
     currentToken = 'token-de-teste';
     logout.mockClear();
+    open.mockClear();
 
     TestBed.configureTestingModule({
       providers: [
         // AuthService de mentira: o interceptor só precisa de token() e logout()
         { provide: AuthService, useValue: { token: () => currentToken, logout } },
+        // MatSnackBar de mentira: assim o teste confere o aviso sem abrir nada na tela
+        { provide: MatSnackBar, useValue: { open } },
         provideHttpClient(withInterceptors([authInterceptor])),
         provideHttpClientTesting(),
       ],
@@ -66,15 +71,24 @@ describe('authInterceptor', () => {
       expect(logout).toHaveBeenCalledOnce();
     });
 
-    it('não encerra a sessão quando o 401 vem do próprio login (senha errada)', () => {
+    it('avisa que a sessão expirou quando a API responde 401', () => {
+      http.get(`${API_URL}/users`).subscribe({ error: () => undefined });
+
+      controller.expectOne(`${API_URL}/users`).flush(null, { status: 401, statusText: 'Unauthorized' });
+
+      expect(open).toHaveBeenCalledWith('Sua sessão expirou. Entre novamente.', 'Fechar', { duration: 6000 });
+    });
+
+    it('não encerra a sessão nem avisa quando o 401 vem do próprio login (senha errada)', () => {
       http.post(`${API_URL}/auth/login`, {}).subscribe({ error: () => undefined });
 
       controller.expectOne(`${API_URL}/auth/login`).flush(null, { status: 401, statusText: 'Unauthorized' });
 
       expect(logout).not.toHaveBeenCalled();
+      expect(open).not.toHaveBeenCalled();
     });
 
-    it('não encerra a sessão em outros erros, como 403 e 500', () => {
+    it('não encerra a sessão nem avisa em outros erros, como 403 e 500', () => {
       http.get(`${API_URL}/users`).subscribe({ error: () => undefined });
       controller.expectOne(`${API_URL}/users`).flush(null, { status: 403, statusText: 'Forbidden' });
 
@@ -82,6 +96,7 @@ describe('authInterceptor', () => {
       controller.expectOne(`${API_URL}/users`).flush(null, { status: 500, statusText: 'Server Error' });
 
       expect(logout).not.toHaveBeenCalled();
+      expect(open).not.toHaveBeenCalled();
     });
 
     it('repassa o erro original para quem chamou', () => {
