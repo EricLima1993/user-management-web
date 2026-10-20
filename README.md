@@ -18,7 +18,7 @@ A aplicação permite entrar com e-mail e senha, listar usuários com paginaçã
 - [x] Indicador de carregamento na listagem e no formulário
 - [x] Layout responsivo (barra superior, listagem e formulário em telas pequenas)
 - [x] Testes automatizados (97 testes com Vitest, cerca de 88% de cobertura de linhas)
-- [ ] Docker e Docker Compose
+- [x] Docker e Docker Compose (build do Angular servido por nginx)
 
 > Este README é atualizado conforme o desenvolvimento avança.
 
@@ -106,7 +106,28 @@ Serviços, guards, interceptor, login, formulário, listagem e detalhes de usuá
 
 ### Docker
 
-*Será documentado após a conclusão do Docker Compose.*
+O front também roda em container: o Angular é compilado em uma etapa com Node e os arquivos prontos são servidos por um nginx, que devolve o `index.html` nas rotas da aplicação (como `/users/7/details`).
+
+Pré-requisitos: Docker e a [API](https://github.com/EricLima1993/user-management) rodando em `http://localhost:8080` (o `docker compose up` da própria API sobe API e PostgreSQL).
+
+```
+docker compose up --build
+```
+
+A aplicação fica em <http://localhost:4200>. Pare o `ng serve` antes, porque os dois usam a porta 4200. Para encerrar:
+
+```
+docker compose down
+```
+
+| Arquivo | Para que serve |
+| --- | --- |
+| `Dockerfile` | Etapa 1: `npm ci` e `npm run build` com Node 24. Etapa 2: copia o resultado para uma imagem nginx |
+| `nginx.conf` | Fallback das rotas do Angular para o `index.html`, compressão e cache dos arquivos com hash |
+| `docker-compose.yml` | Sobe o container e publica a porta 4200 |
+| `.dockerignore` | Deixa `node_modules`, `dist` e `.git` fora do build |
+
+O navegador é quem chama a API, por isso a URL continua `http://localhost:8080/api/v1` (ver *Endereço da API*). A origem `http://localhost:4200` já está liberada no CORS da API. O build baixa a fonte Roboto do Google Fonts, então precisa de internet.
 
 ## Estrutura do projeto
 

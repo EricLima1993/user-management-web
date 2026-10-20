@@ -1,0 +1,7 @@
+services:
+  web:
+    build: .
+    # 4200 é a origem que o CORS da API já libera por padrão
+    ports:
+      - "4200:80"
+    restart: unless-stopped
